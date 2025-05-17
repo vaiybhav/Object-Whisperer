@@ -15,6 +15,16 @@ export default function Home() {
   const [detectedObjects, setDetectedObjects] = useState<cocossd.DetectedObject[]>([])
   const [selectedObject, setSelectedObject] = useState<cocossd.DetectedObject | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [isCameraOn, setIsCameraOn] = useState(true)
+  
+  const toggleCamera = () => {
+    if (isCameraOn) {
+      // If turning camera off, clear selection
+      setSelectedObject(null);
+      setIsPlaying(false);
+    }
+    setIsCameraOn(!isCameraOn);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center p-6 relative">
@@ -39,9 +49,10 @@ export default function Home() {
               onObjectsDetected={setDetectedObjects}
               isModelLoading={isModelLoading}
               setIsModelLoading={setIsModelLoading}
+              isCameraOn={isCameraOn}
             />
             
-            {detectedObjects.map((object, index) => (
+            {isCameraOn && detectedObjects.map((object, index) => (
               <ObjectBox
                 key={index}
                 object={object}
@@ -50,7 +61,7 @@ export default function Home() {
               />
             ))}
             
-            {selectedObject && (
+            {isCameraOn && selectedObject && (
               <SpeechBubble
                 object={selectedObject}
                 isPlaying={isPlaying}
@@ -59,7 +70,9 @@ export default function Home() {
           </div>
           
           <div className="mt-4 text-center text-sm text-white/60">
-            Point your camera at objects to bring them to life!
+            {isCameraOn 
+              ? "Point your camera at objects to bring them to life!" 
+              : "Turn on the camera to detect objects"}
           </div>
         </div>
       </motion.div>
@@ -68,6 +81,8 @@ export default function Home() {
         isPlaying={isPlaying}
         setIsPlaying={setIsPlaying}
         hasSelectedObject={!!selectedObject}
+        isCameraOn={isCameraOn}
+        toggleCamera={toggleCamera}
       />
     </main>
   )

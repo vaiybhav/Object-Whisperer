@@ -7,9 +7,11 @@ interface ControlsProps {
   isPlaying: boolean
   setIsPlaying: (playing: boolean) => void
   hasSelectedObject: boolean
+  isCameraOn: boolean
+  toggleCamera: () => void
 }
 
-export function Controls({ isPlaying, setIsPlaying, hasSelectedObject }: ControlsProps) {
+export function Controls({ isPlaying, setIsPlaying, hasSelectedObject, isCameraOn, toggleCamera }: ControlsProps) {
   const [currentEffect, setCurrentEffect] = useState<string | null>(null);
 
   return (
@@ -81,15 +83,34 @@ export function Controls({ isPlaying, setIsPlaying, hasSelectedObject }: Control
           >
             🎨
           </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleCamera}
+            className="glass-button text-2xl text-white hover:text-white/90"
+          >
+            {isCameraOn ? '📷' : '🚫'}
+          </motion.button>
         </div>
         
-        {!hasSelectedObject && (
+        {!hasSelectedObject && isCameraOn && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="absolute -top-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap text-sm text-white/60"
           >
             Select an object to start
+          </motion.div>
+        )}
+        
+        {!isCameraOn && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute -top-12 left-1/2 transform -translate-x-1/2 whitespace-nowrap text-sm text-white/60"
+          >
+            Camera is turned off
           </motion.div>
         )}
       </motion.div>
