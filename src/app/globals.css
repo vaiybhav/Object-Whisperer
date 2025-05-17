@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: 79, 70, 229;
+  --secondary: 236, 72, 153;
+  --background: 17, 24, 39;
+  --foreground: 255, 255, 255;
+  --accent: 139, 92, 246;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground));
+  background: linear-gradient(
+    135deg,
+    rgb(var(--background)),
+    rgb(31, 41, 55)
+  );
+  min-height: 100vh;
+}
+
+@layer components {
+  .glass-panel {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .glass-button {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 300ms ease-out;
+  }
+
+  .glass-button:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+
+  .glass-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .glass-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .gradient-text {
+    background: linear-gradient(to right, #ec4899, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+  }
+}
+
+/* Fun theme */
+:root.theme-fun {
+  --primary: 255, 87, 51;    /* Bright coral */
+  --secondary: 255, 196, 0;  /* Bright yellow */
+  --background: 123, 31, 162; /* Deep purple */
+  --foreground: 255, 255, 255;
+  --accent: 0, 230, 118;     /* Bright green */
+}
+
+:root.theme-fun .glass-panel {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+}
+
+:root.theme-fun .glass-button {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+:root.theme-fun .gradient-text {
+  background: linear-gradient(to right, rgb(var(--secondary)), rgb(var(--accent)));
+} 
