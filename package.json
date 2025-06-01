@@ -6,29 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:load": "cd src/scripts && ts-node --project tsconfig.json load-test.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow/tfjs": "^4.22.0",
-    "@vercel/analytics": "^1.2.2",
-    "@vercel/blob": "^0.22.1",
-    "axios": "^1.6.7",
+    "@tensorflow/tfjs-backend-webgl": "^4.22.0",
     "framer-motion": "^11.18.2",
-    "gaxios": "^6.7.1",
-    "google-auth-library": "^9.15.1",
-    "https-proxy-agent": "^7.0.6",
-    "jose": "^6.0.11",
     "next": "^14.1.0",
-    "node-fetch": "^3.3.2",
-    "openai": "^4.98.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
     "react-webcam": "^7.2.0",
-    "typescript": "^5.3.3",
-    "zustand": "^4.5.1"
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.17.46",
@@ -37,7 +29,10 @@
     "autoprefixer": "^10.4.17",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.1.0",
+    "node-fetch": "^2.7.0",
+    "@types/node-fetch": "^2.6.11",
     "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2"
   }
 }
