@@ -116,7 +116,9 @@ export default function ObjectWhispererPage() {
         @media (max-width: 640px) {
           .camera-view-container {
             aspect-ratio: 9/16;
-            height: 70vh;
+            height: 80vh;
+            width: 45vh;
+            margin: 0 auto;
           }
         }
         .camera-view-container:hover {
