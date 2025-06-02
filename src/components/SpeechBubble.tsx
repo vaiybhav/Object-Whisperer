@@ -14,21 +14,37 @@ interface SpeechBubbleProps {
 export function SpeechBubble({ object, isPlaying, isDeepGaze = false }: SpeechBubbleProps) {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor;
+      const isMobileDevice = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+      setIsMobile(isMobileDevice);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { bbox, class: objectClass } = object
   const [x, y, width] = bbox
   
-  const bubbleWidth = 288;
+  const bubbleWidth = isMobile ? '100%' : 288;
   const bubbleHeight = isDeepGaze ? 160 : 120;
   const objectCenterX = x + width / 2;
   
-  let bubbleX = objectCenterX - bubbleWidth / 2;
-  let bubbleY = y - bubbleHeight - 15;
+  // Only calculate position if not mobile
+  let bubbleX = isMobile ? 0 : objectCenterX - (typeof bubbleWidth === 'number' ? bubbleWidth : 288) / 2;
+  let bubbleY = isMobile ? 0 : y - bubbleHeight - 15;
   
-  if (typeof window !== "undefined"){
+  if (!isMobile && typeof window !== "undefined") {
     if (bubbleX < 10) bubbleX = 10;
-    if (bubbleX + bubbleWidth > window.innerWidth - 10) bubbleX = window.innerWidth - bubbleWidth - 10;
+    if (bubbleX + (typeof bubbleWidth === 'number' ? bubbleWidth : 288) > window.innerWidth - 10) {
+      bubbleX = window.innerWidth - (typeof bubbleWidth === 'number' ? bubbleWidth : 288) - 10;
+    }
     if (bubbleY < 10) bubbleY = y + bbox[3] + 15;
   }
   
@@ -82,11 +98,11 @@ export function SpeechBubble({ object, isPlaying, isDeepGaze = false }: SpeechBu
     <AnimatePresence>
       {(isPlaying || isLoading || error) && (
         <motion.div
-          className={`absolute z-20 w-72 speech-bubble-fun ${isDeepGaze ? 'deep-gaze-bubble' : ''}`}
-          style={{
+          className={`${isMobile ? 'w-full' : 'absolute z-20 w-72'} speech-bubble-fun ${isDeepGaze ? 'deep-gaze-bubble' : ''}`}
+          style={!isMobile ? {
             left: `${bubbleX}px`,
             top: `${bubbleY}px`,
-          }}
+          } : undefined}
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 10, transition: {duration: 0.2}} }
@@ -96,19 +112,21 @@ export function SpeechBubble({ object, isPlaying, isDeepGaze = false }: SpeechBu
             damping: 25
           }}
         >
-          <svg 
-            width="20" 
-            height="10" 
-            className={`absolute left-1/2 transform -translate-x-1/2 bottom-[-9px] ${isDeepGaze ? 'text-green-700/70' : 'text-purple-700/70 dark:text-gray-800/70'} fill-current`}
-          >
-            <motion.path 
-              d="M0 0 L10 10 L20 0 Z" 
-              variants={tailVariants}
-              initial="hidden"
-              animate="visible"
-              className="filter drop-shadow-sm"
-            />
-          </svg>
+          {!isMobile && (
+            <svg 
+              width="20" 
+              height="10" 
+              className={`absolute left-1/2 transform -translate-x-1/2 bottom-[-9px] ${isDeepGaze ? 'text-green-700/70' : 'text-purple-700/70 dark:text-gray-800/70'} fill-current`}
+            >
+              <motion.path 
+                d="M0 0 L10 10 L20 0 Z" 
+                variants={tailVariants}
+                initial="hidden"
+                animate="visible"
+                className="filter drop-shadow-sm"
+              />
+            </svg>
+          )}
 
           <div className={`${isDeepGaze ? 'bg-green-700/70' : 'bg-purple-700/70 dark:bg-gray-800/70'} backdrop-blur-md p-4 rounded-xl shadow-2xl ring-1 ring-white/10 min-h-[80px] flex flex-col justify-center items-center`}>
             {isLoading ? (

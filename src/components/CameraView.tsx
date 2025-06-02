@@ -39,27 +39,46 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
   const frameCountRef = useRef(0)
   const lastProcessedTimeRef = useRef(0)
   const aggregatedPredictionsRef = useRef<cocossd.DetectedObject[]>([])
+  const [isMobile, setIsMobile] = useState(false)
   
+  // Detect if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor;
+      const isMobileDevice = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+      setIsMobile(isMobileDevice);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Updated video constraints for better mobile handling
+  const videoConstraints = {
+    facingMode: isMobile ? { exact: "environment" } : "user",
+    aspectRatio: 16/9,
+    width: { min: 640, ideal: 1280, max: 1920 },
+    height: { min: 480, ideal: 720, max: 1080 },
+    frameRate: { ideal: 30 }
+  };
+
   useEffect(() => {
     const checkPermission = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
-        })
-        setHasPermission(true)
-        stream.getTracks().forEach(track => track.stop())
+          video: videoConstraints
+        });
+        setHasPermission(true);
+        stream.getTracks().forEach(track => track.stop());
       } catch (error) {
-        console.error('Camera permission error:', error)
-        setHasPermission(false)
+        console.error('Camera permission error:', error);
+        setHasPermission(false);
       }
-    }
+    };
     
-    checkPermission()
-  }, [])
+    checkPermission();
+  }, [isMobile]);
   
   // Enhanced model loading with advanced configuration
   useEffect(() => {
@@ -291,10 +310,10 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
   
   if (hasPermission === false) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-white p-4 text-center">
+      <div className="absolute inset-0 flex items-center justify-center bg-black/90 text-white text-center p-4">
         <div>
-          <p className="text-xl mb-2">📸 Camera access needed</p>
-          <p className="text-sm opacity-80">Please allow camera access to use Object Whisperer</p>
+          <p className="text-lg font-semibold mb-2">Camera Access Required</p>
+          <p className="text-sm opacity-80">Please enable camera access to use object detection.</p>
         </div>
       </div>
     )
@@ -302,23 +321,17 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
   
   return (
     <div className="relative w-full h-full">
-      {isCameraOn ? (
+      {isCameraOn && hasPermission && (
         <Webcam
           ref={webcamRef}
           audio={false}
-          className="w-full h-full object-cover transform scale-x-[-1]"
           screenshotFormat="image/jpeg"
-          videoConstraints={{
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+          videoConstraints={videoConstraints}
+          className="w-full h-full object-cover"
+          style={{
+            transform: isMobile ? 'scaleX(-1)' : 'none',
           }}
-          mirrored={false}
         />
-      ) : (
-        <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-          <div className="text-white text-xl">Camera is off</div>
-        </div>
       )}
       
       {isModelLoading && isCameraOn && (

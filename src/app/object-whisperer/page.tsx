@@ -52,6 +52,21 @@ export default function ObjectWhispererPage() {
 
   const mainContainerRef = useRef<HTMLDivElement>(null)
 
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Detect if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor;
+      const isMobileDevice = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+      setIsMobile(isMobileDevice);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     if (!isModelLoading && typeof window !== 'undefined') {
         cocossd.load().then(() => console.log("COCO-SSD preloaded or loaded"))
@@ -95,6 +110,15 @@ export default function ObjectWhispererPage() {
         .object-whisperer-title span.gradient-text {
             filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.7)); /* Enhanced violet glow */
         }
+        .camera-view-container {
+          aspect-ratio: 16/9;
+        }
+        @media (max-width: 640px) {
+          .camera-view-container {
+            aspect-ratio: 9/16;
+            height: 70vh;
+          }
+        }
         .camera-view-container:hover {
             box-shadow: 0 0 25px rgba(192, 132, 252, 0.4), 0 0 10px rgba(220, 200, 255, 0.3) inset;
             border-color: rgba(192, 132, 252, 0.7);
@@ -108,6 +132,13 @@ export default function ObjectWhispererPage() {
         .deep-gaze-active {
           box-shadow: 0 0 30px rgba(139, 195, 74, 0.4), 0 0 15px rgba(139, 195, 74, 0.2) inset !important;
           border-color: rgba(139, 195, 74, 0.6) !important;
+        }
+        .mobile-response {
+          position: relative !important;
+          top: auto !important;
+          left: auto !important;
+          width: 100% !important;
+          margin-top: 1rem;
         }
       `}</style>
 
@@ -141,7 +172,7 @@ export default function ObjectWhispererPage() {
         transition={{ duration: 0.6, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
       >
         <motion.div 
-          className={`w-full aspect-[16/9] sm:aspect-video bg-black/50 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl relative ring-1 ring-purple-500/40 camera-view-container transition-all duration-300 hover:ring-purple-300/70 ${isDeepGaze ? 'deep-gaze-active' : ''}`} // Added conditional class
+          className={`w-full camera-view-container bg-black/50 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl relative ring-1 ring-purple-500/40 transition-all duration-300 hover:ring-purple-300/70 ${isDeepGaze ? 'deep-gaze-active' : ''}`} // Added conditional class
           style={{ transform: "translateZ(25px)" }} // Slightly more Z translation
           whileHover={{ scale: 1.015 }} // Slightly more pronounced hover scale
         >
@@ -186,13 +217,25 @@ export default function ObjectWhispererPage() {
             </motion.div>
           )}
           
-          {selectedObject && isCameraOn && (
+          {/* Mobile Response Container */}
+          {isMobile && selectedObject && isCameraOn && (
+            <div className="w-full mt-4">
               <SpeechBubble
                 object={selectedObject}
                 isPlaying={isPlaying}
                 isDeepGaze={isDeepGaze}
               />
-            )}
+            </div>
+          )}
+
+          {/* Desktop Response */}
+          {!isMobile && selectedObject && isCameraOn && (
+            <SpeechBubble
+              object={selectedObject}
+              isPlaying={isPlaying}
+              isDeepGaze={isDeepGaze}
+            />
+          )}
         </motion.div>
 
         <AnimatePresence>
