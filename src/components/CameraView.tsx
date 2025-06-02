@@ -57,7 +57,7 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
   // Updated video constraints for better mobile handling
   const videoConstraints = {
     facingMode: isMobile ? { exact: "environment" } : "user",
-    aspectRatio: isMobile ? 9/16 : 16/9,
+    aspectRatio: isMobile ? 16/9 : 16/9, 
     width: { min: 640, ideal: 1280, max: 1920 },
     height: { min: 480, ideal: 720, max: 1080 },
     frameRate: { ideal: 30 }
@@ -329,7 +329,7 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
           videoConstraints={videoConstraints}
           className="w-full h-full object-cover"
           style={{
-            transform: isMobile ? 'rotate(90deg) scaleX(-1)' : 'scaleX(-1)',
+            transform: isMobile ? 'scaleX(-1)' : 'scaleX(-1)',
           }}
         />
       )}
