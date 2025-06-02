@@ -26,6 +26,26 @@ const MAX_HISTORY = 1000
 const MAX_REQUESTS_PER_MINUTE = 300
 const REQUEST_WINDOW = 60 * 1000 // 1 minute
 
+// Load API keys at startup
+const envKeys = process.env.GEMINI_API_KEYS || '';
+const keyList = envKeys.split(',')
+  .map(k => k.trim())
+  .filter(k => k.length > 0);
+
+if (keyList.length === 0) {
+  console.error('No API keys found in GEMINI_API_KEYS environment variable');
+  throw new Error('No API keys configured');
+}
+
+// Initial load of keys
+apiKeys = keyList.map(key => ({
+  key,
+  usageCount: 0,
+  lastUsed: 0,
+  messageHistory: []
+}));
+console.log(`Initialized with ${apiKeys.length} keys`);
+
 // Rate limiting state
 let requestCounts = new Map<string, number[]>();
 
@@ -47,7 +67,7 @@ setInterval(() => {
       requestCounts.set(ip, validTimestamps);
     }
   });
-}, 5 * 60 * 1000); // Run cleanup every 5 minutes
+}, 5 * 60 * 1000);
 
 // Rate limiting function
 function isRateLimited(ip: string): boolean {
@@ -61,33 +81,6 @@ function isRateLimited(ip: string): boolean {
   
   requestCounts.set(ip, [...recentRequests, now]);
   return false;
-}
-
-// Load API keys from environment variables
-function loadApiKeysFromEnv() {
-  // Only load keys if we don't have any
-  if (apiKeys.length > 0) return;
-  
-  console.log('Loading initial API keys...');
-  const envKeys = process.env.GEMINI_API_KEYS || '';
-  
-  const keyList = envKeys.split(',')
-    .map(k => k.trim())
-    .filter(k => k.length > 0);
-  
-  if (keyList.length === 0) {
-    console.error('No API keys found in GEMINI_API_KEYS environment variable');
-    throw new Error('No API keys configured');
-  }
-  
-  // Initial load of keys
-  apiKeys = keyList.map(key => ({
-    key,
-    usageCount: 0,
-    lastUsed: 0,
-    messageHistory: []
-  }));
-  console.log(`Initialized with ${apiKeys.length} keys`);
 }
 
 // Message caching implementation
@@ -123,8 +116,6 @@ function cacheMessage(object: string, isDeepGaze: boolean, message: string) {
 }
 
 async function getNextApiKey(): Promise<string> {
-  loadApiKeysFromEnv();
-  
   if (apiKeys.length === 0) {
     throw new Error('No API keys available');
   }
@@ -155,7 +146,6 @@ async function getNextApiKey(): Promise<string> {
   throw new Error('All API keys are at their usage limit');
 }
 
-
 export async function POST(request: Request) {
   try {
     console.log('Received POST request');
@@ -185,7 +175,6 @@ export async function POST(request: Request) {
     let apiKey;
     try {
       apiKey = await getNextApiKey();
-      console.log('Got API key:', apiKey ? 'Success' : 'Failed');
     } catch (error) {
       console.error('API key error:', error);
       return NextResponse.json(
@@ -292,14 +281,18 @@ export async function POST(request: Request) {
     }
 
     try {
+      console.log('Initializing Gemini AI with key...');
       const model = genAI.getGenerativeModel({ 
         model: 'gemini-1.5-flash',
         generationConfig: modelConfig
       });
+      console.log('Model initialized, generating content...');
 
       const result = await model.generateContent(prompt);
+      console.log('Content generated, getting response...');
       const response = await result.response;
       const message = response.text();
+      console.log('Generated message:', message);
       
       cacheMessage(object, isDeepGaze, message);
       

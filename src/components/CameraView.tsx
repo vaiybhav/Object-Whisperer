@@ -329,7 +329,7 @@ export function CameraView({ onObjectsDetected, isModelLoading, setIsModelLoadin
           videoConstraints={videoConstraints}
           className="w-full h-full object-cover"
           style={{
-            transform: isMobile ? 'scaleX(-1)' : 'scaleX(-1)',
+            transform: isMobile ? 'none' : 'scaleX(-1)',
           }}
         />
       )}
